@@ -35,6 +35,13 @@ class Ui_MainWindow(object):
         font.setPointSize(20)
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
+        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_2.setGeometry(QtCore.QRect(290, 0, 101, 51))
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setStyleSheet("background-color: rgb(255, 255, 127);")
+        self.pushButton_2.setObjectName("pushButton_2")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 392, 22))
@@ -52,6 +59,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.pushButton.setText(_translate("MainWindow", "Check Update"))
         self.label_2.setText(_translate("MainWindow", " version 0.1"))
+        self.pushButton_2.setText(_translate("MainWindow", "update"))
 
 
 if __name__ == "__main__":
