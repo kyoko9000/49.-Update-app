@@ -28,7 +28,6 @@ class MainWindow(QMainWindow):
     def process_update(self):
         try:
             self.Update_Lable("update process..")
-            print(requests.get(the_url, stream=True).headers['Content-Length'])
             the_filesize = requests.get(the_url, stream=True).headers['Content-Length']
             the_fileobj = open(the_filepath, 'wb')
             #### Create a download thread
