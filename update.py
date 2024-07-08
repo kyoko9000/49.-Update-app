@@ -5,8 +5,8 @@ import sys
 import zipfile
 
 import requests
-from PyQt6.QtCore import *
-from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from gui1 import Ui_MainWindow
 
 dest_dir = os.getcwd()
