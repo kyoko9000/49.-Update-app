@@ -17,6 +17,7 @@ the_url = 'https://codeload.github.com/kyoko9000/update/zip/refs/heads/main'
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.downloadThread = None
         self.uic = Ui_MainWindow()
         self.uic.setupUi(self)
 
@@ -26,31 +27,14 @@ class MainWindow(QMainWindow):
 
     # Download button event
     def process_update(self):
-        try:
-            self.Update_Lable("update process..")
-            the_filesize = requests.get(the_url, stream=True).headers['Content-Length']
-            the_fileobj = open(the_filepath, 'wb')
-            #### Create a download thread
-            self.downloadThread = downloadThread(the_url, the_filesize, the_fileobj, buffer=1024)
-            self.downloadThread.download_proess_signal.connect(self.set_progressbar_value)
-            self.downloadThread.start()
+        # Create a download thread
+        self.downloadThread = downloadThread()
+        self.downloadThread.status_signal.connect(self.Update_Lable)
+        self.downloadThread.download_proess_signal.connect(self.set_progressbar_value)
+        self.downloadThread.start()
 
-        except:
-            self.Update_Lable("connecting...")
-            self.process_update()
-            # self.update_if_fail()
-
-    def Update_Lable(self, lable):
-        self.uic.label.setText(lable)
-
-    # def update_if_fail(self):
-    #     with requests.get(the_url) as r:
-    #         r.raise_for_status()
-    #         with open(the_filepath, 'wb') as f:
-    #             for chunk in r.iter_content(chunk_size=1024):
-    #                 if chunk:  # filter out keep-alive new chunks
-    #                     f.write(chunk)
-    #     self.set_progressbar_value(100)
+    def Update_Lable(self, signal):
+        self.uic.label.setText(signal)
 
     # Setting progress bar
     def set_progressbar_value(self, value):
@@ -78,20 +62,22 @@ class MainWindow(QMainWindow):
 # Download thread
 ##################################################################
 class downloadThread(QThread):
-    download_proess_signal = pyqtSignal(int)  # Create signal
+    status_signal = pyqtSignal(object)
+    download_proess_signal = pyqtSignal(object)  # Create signal
 
-    def __init__(self, url, filesize, fileobj, buffer):
-        super(downloadThread, self).__init__()
-        self.url = url
-        self.filesize = filesize
-        self.fileobj = fileobj
-        self.buffer = buffer
+    def __init__(self):
+        super().__init__()
+        self.fileobj = None
+        self.filesize = None
+        self.url = the_url
 
     def run(self):
         try:
+            self.check_size()
+            self.status_signal.emit("in process..")
             rsp = requests.get(self.url, stream=True)  # Streaming download mode
             offset = 0
-            for chunk in rsp.iter_content(chunk_size=self.buffer):
+            for chunk in rsp.iter_content(chunk_size=1024):
                 if not chunk: break
                 self.fileobj.seek(offset)  # Setting Pointer Position
                 self.fileobj.write(chunk)  # write file
@@ -102,10 +88,17 @@ class downloadThread(QThread):
             self.fileobj.close()  # Close file
             self.exit(0)  # Close thread
 
-
-        except Exception as e:
-            # print(e)
+        except:
             pass
+
+    def check_size(self):
+        try:
+            self.status_signal.emit("start process..")
+            self.filesize = requests.get(the_url, stream=True).headers['Content-Length']
+            self.fileobj = open(the_filepath, 'wb')
+        except:
+            self.status_signal.emit("connecting...")
+            self.check_size()
 
 
 if __name__ == "__main__":
